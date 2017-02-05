@@ -8,15 +8,20 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
-class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIApplicationDelegate, UISearchBarDelegate{
 
     @IBOutlet weak var tableView: UITableView!
-    
+    let refreshControl: UIRefreshControl = UIRefreshControl()
     var movies: [NSDictionary]?
+    var window: UIWindow?
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        refreshControl.addTarget(self, action: #selector(MoviesViewController.uiRefreshControlAction), for: UIControlEvents.valueChanged)
+        self.tableView.addSubview(refreshControl)
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -24,7 +29,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
+        MBProgressHUD.showAdded(to: self.view, animated: true)
         let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
+        MBProgressHUD.hide(for: self.view, animated: true)
             if let data = data {
                 if let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as? NSDictionary {
                     print(dataDictionary)
@@ -35,6 +42,18 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         }
         task.resume()
         // Do any additional setup after loading the view.
+    }
+    
+//    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
+//    {
+//        UIApplication.shared.statusBarStyle = .lightContent
+//        return true
+//    }
+    
+    func uiRefreshControlAction()
+    {
+        self.tableView.reloadData()
+        refreshControl.endRefreshing()
     }
 
     override func didReceiveMemoryWarning() {
@@ -58,16 +77,33 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         let movie = movies![indexPath.row]
         let title = movie["title"] as! String
-        let overview = movie["overview"] as! String
+        let rating = movie["vote_average"] as! Double
         
         let baseURL = "https://image.tmdb.org/t/p/w500"
         let posterPath = movie["poster_path"] as! String
         let imageURL = NSURL(string: baseURL + posterPath)
+        let releaseDate = movie["release_date"] as! String
+        let overview = movie["overview"] as! String
         
-        cell.titleLabel.text = title
+        
         cell.overviewLabel.text = overview
+        cell.titleLabel.text = title
         cell.posterView.setImageWith(imageURL as! URL)
+        cell.ratingLabel.text = String(rating)
+        cell.releaseLabel.text = releaseDate
         
+        if rating < 5
+        {
+            cell.ratingLabel.textColor = UIColor.red
+        }
+        else if rating >= 7
+        {
+            cell.ratingLabel.textColor = UIColor.green
+        }
+        else
+        {
+            cell.ratingLabel.textColor = UIColor.yellow
+        }
         
         print("row \(indexPath.row)")
         return cell
