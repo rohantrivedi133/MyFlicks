@@ -30,12 +30,17 @@ Please list two areas of the assignment you'd like to **discuss further with you
 
 1. I would like to discuss implementation of a status search bar
 2. I would like to discuss the addition of network errors and animation
+3. I would like to learn how to add a nagivation window before the page with a tabbar
 
 ## Video Walkthrough 
 
-Here's a walkthrough of implemented user stories:
+Here's the first walkthrough of implemented user stories:
 
 <img src='http://i.imgur.com/0JMkbHZ.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+
+Here's the second walkthorugh of implemented user stories:
+
+<img src='http://imgur.com/kp21jvy.gif' title = 'Video Walkthrough 2' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
