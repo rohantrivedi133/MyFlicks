@@ -16,7 +16,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     let refreshControl: UIRefreshControl = UIRefreshControl()
     var movies: [NSDictionary]?
     var window: UIWindow?
-    
+    var endpoint: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,7 +26,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         tableView.dataSource = self
         tableView.delegate = self
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
+        let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         MBProgressHUD.showAdded(to: self.view, animated: true)
@@ -80,15 +80,19 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         let rating = movie["vote_average"] as! Double
         
         let baseURL = "https://image.tmdb.org/t/p/w500"
-        let posterPath = movie["poster_path"] as! String
-        let imageURL = NSURL(string: baseURL + posterPath)
+        if let backdropPath = movie["backdrop_path"] as? String
+        {
+            let imageURL = NSURL(string: baseURL + backdropPath)
+            cell.posterView.setImageWith(imageURL as! URL)
+        }
+        
         let releaseDate = movie["release_date"] as! String
         let overview = movie["overview"] as! String
         
         
         cell.overviewLabel.text = overview
         cell.titleLabel.text = title
-        cell.posterView.setImageWith(imageURL as! URL)
+        
         cell.ratingLabel.text = String(rating)
         cell.releaseLabel.text = releaseDate
         
@@ -109,14 +113,21 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         return cell
     }
 
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?)
+    {
+        let cell = sender as! UITableViewCell
+        let indexPath = tableView.indexPath(for: cell)
+        let movie = movies![indexPath!.row]
+        
+        let detailViewController = segue.destination as! DetailViewController
+        detailViewController.movie = movie
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
     }
-    */
+    
 
 }
